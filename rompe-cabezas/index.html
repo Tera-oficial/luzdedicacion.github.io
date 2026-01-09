@@ -2,8 +2,9 @@
 <!-- Variable: page_title | text | Valor por defecto: Rompecabezas del Amor -->
 <!-- Variable: main_title | text | Valor por defecto: Rompecabezas del Amor -->
 <!-- Variable: puzzle_image | url | Valor por defecto: https://cdn.pensador.com/es/imagenes/sin-ti-mi-vida-tendri-a-menos-luz-te-amo-mi-amor.jpg -->
-<!-- Variable: grid_size | text | Valor por defecto: 3 -->
+<!-- Variable: grid_size | text | Valor por defecto: 2 -->
 <!-- Variable: completion_title | text | Valor por defecto: Este es el texto del final cuando termina el puzzle -->
+<!-- Variable: completion_message | text | Valor por defecto: ¡Lo lograste! Gracias por armar nuestro rompecabezas del amor. Te amo infinitamente. 💕 -->
 <!-- Variable: completion_button | text | Valor por defecto: Cerrar -->
 <!-- Variable: music_file | url | Valor por defecto: Chino&Nacho - Niña Bonita.mp3 -->
 <html lang="es">
@@ -13,39 +14,72 @@
   <title>Rompecabezas del Amor</title>
   <script src="https://unpkg.com/konva@9.3.6/konva.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: linear-gradient(to bottom, #ffecf0, #fff0f5); overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; }
+    h1 { color: #db2777; text-shadow: 0 2px 10px rgba(219,39,119,0.4); }
+    .button-container button {
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: white;
+      padding: 12px 28px;
+      border-radius: 999px;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(236,72,153,0.4);
+      transition: all 0.3s ease;
+    }
+    .button-container button:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(236,72,153,0.6); }
+    #previewModal, #completionModal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: none; align-items: center; justify-content: center; z-index: 9999;
+    }
+    #previewImage {
+      max-width: 90vw; max-height: 80vh; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    #completionModal div {
+      background: white; padding: 2.5rem; border-radius: 20px; text-align: center;
+      max-width: 90%; box-shadow: 0 10px 40px rgba(236,72,153,0.5);
+    }
+  </style>
 </head>
-<body class="flex flex-col items-center justify-start min-h-screen p-2">
-  <canvas id="backgroundCanvas"></canvas>
+<body class="flex flex-col items-center justify-start min-h-screen p-2 bg-gradient-to-b from-pink-50 to-pink-100">
 
-  <h1 class="font-extrabold text-3xl sm:text-6xl md:text-[3.5rem] text-center" id="mainTitle">Rompecabezas del Amor</h1>
+  <canvas id="backgroundCanvas" class="fixed inset-0 z-0"></canvas>
 
-  <div id="container" class="mb-4"></div>
+  <h1 class="font-extrabold text-3xl sm:text-5xl md:text-6xl text-center text-pink-600 mt-4 mb-6 z-10" id="mainTitle">
+    Rompecabezas del Amor
+  </h1>
 
-  <div class="button-container flex flex-row justify-center items-center gap-6 w-full max-w-lg">
-    <button id="previewButton" class="shadow-xl">Ver Imagen</button>
-    <button id="playPauseButton" class="shadow-xl">▶</button>
-    <button id="resetButton" class="shadow-xl">Reinciar</button>
+  <div id="container" class="mb-6 z-10 shadow-2xl rounded-xl overflow-hidden"></div>
+
+  <div class="button-container flex flex-row justify-center items-center gap-4 sm:gap-6 w-full max-w-lg z-10">
+    <button id="previewButton">Ver Imagen</button>
+    <button id="playPauseButton">▶</button>
+    <button id="resetButton">Reiniciar</button>
   </div>
 
-  <audio id="backgroundMusic" src="Chino&Nacho%20-%20Niña%20Bonita.mp3" preload="auto" loop></audio>
+  <audio id="backgroundMusic" src="Chino&Nacho - Niña Bonita.mp3" preload="auto" loop></audio>
 
-  <div id="previewModal">
-    <img id="previewImage" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpvRRub-ODLG5AAHLD4g1Hyx1X1RAbvUPuBpdM1whwQqdOOQiZzfSvuDtGrRgADTc-HMNwlumHxyAG4GFg7IKcs25oU0D2Qm9lWmwBpz0&s=10" alt="Puzzle Preview">
-    <button id="closeModal">Cerrar</button>
-  </div>
-
-  <div id="completionModal">
-    <div>
-      <h2 id="completionTitle">Este es el texto del final cuando termina el puzzle</h2>
-      <button id="closeCompletionModal" style="margin-left: 20px;">Cerrar</button>
+  <!-- Modal de previsualización -->
+  <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+    <div class="relative max-w-4xl w-full p-4">
+      <img id="previewImage" src="https://cdn.pensador.com/es/imagenes/sin-ti-mi-vida-tendri-a-menos-luz-te-amo-mi-amor.jpg" alt="Puzzle Preview" class="max-w-full max-h-[80vh] rounded-xl shadow-2xl">
+      <button id="closeModal" class="absolute top-4 right-4 bg-white text-pink-600 px-4 py-2 rounded-full font-bold shadow-lg hover:bg-pink-100 transition">Cerrar</button>
     </div>
   </div>
 
-  <audio id="correctSound" src="bien.mp3" preload="auto"></audio>
+  <!-- Modal de completado -->
+  <div id="completionModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-lg w-full">
+      <h2 class="text-3xl font-bold text-pink-600 mb-6" id="completionTitle">Este es el texto del final cuando termina el puzzle</h2>
+      <p class="text-lg text-gray-700 mb-8" id="completionMessage">
+        ¡Lo lograste! Gracias por armar nuestro rompecabezas del amor.<br>
+        Te amo infinitamente. 💕
+      </p>
+      <button id="closeCompletionModal" class="bg-pink-500 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-pink-600 transition">Cerrar</button>
+    </div>
+  </div>
 
   <script>
-    // Fondo animado romántico (corazones y brillos) - sin cambios
+    // Fondo animado romántico (corazones y brillos)
     const canvas = document.getElementById('backgroundCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -106,6 +140,7 @@
       ctx.fillStyle = 'rgba(251, 207, 232, 0.2)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       particles.forEach(p => {
+        ctx.globalAlpha = p.opacity;
         if (p.type === 'heart') {
           ctx.fillStyle = `rgba(219, 39, 119, ${p.opacity})`;
           drawHeart(p.x, p.y, p.size / 2, p.rotation);
@@ -121,6 +156,7 @@
         if (p.x < 0 || p.x > canvas.width) p.speedX = -p.speedX;
         if (p.y < 0 || p.y > canvas.height) p.speedY = -p.speedY;
       });
+      ctx.globalAlpha = 1;
     }
 
     function animateParticles() {
@@ -133,7 +169,7 @@
     animateParticles();
 
     // === ROMPECABEZAS ===
-    const GRID_SIZE = 3; // ← Aquí defines el tamaño: 2 = 2×2 (4 piezas), 3 = 3×3 (9 piezas), 4 = 4×4 (16 piezas), etc.
+    let GRID_SIZE = 2; // ← Valor por defecto, se puede sobrescribir con ?json={"grid_size": "4"}
     let PIECE_SIZE = 100;
     let stage, layer, slotLayer, pieces = [], imageObj = null;
     const connectors = { top: [], left: [] };
@@ -183,6 +219,7 @@
     }
 
     imageObj = new Image();
+    imageObj.crossOrigin = "anonymous";
     imageObj.src = 'https://cdn.pensador.com/es/imagenes/sin-ti-mi-vida-tendri-a-menos-luz-te-amo-mi-amor.jpg';
 
     imageObj.onload = () => {
@@ -231,7 +268,7 @@
         tabPosition = PIECE_SIZE * 0.5;
         initStage(dims.boardSize, dims.extraWidth, dims.extraHeight);
         createPuzzle();
-        initParticles();
+        resizeCanvas();
       }
     });
 
@@ -325,7 +362,8 @@
           group.moveToBottom();
           layer.draw();
           const sound = document.getElementById('correctSound');
-          sound.play().catch(error => console.error('Error al reproducir el sonido:', error));
+          sound.currentTime = 0;
+          sound.play().catch(() => {});
           createHeartExplosion(correctX + PIECE_SIZE / 2, correctY + PIECE_SIZE / 2);
           checkPuzzleCompletion();
         }
@@ -456,7 +494,7 @@
       layer.draw();
     }
 
-    // Control de música (sin cambios)
+    // Control de música
     const playPauseButton = document.getElementById('playPauseButton');
     const backgroundMusic = document.getElementById('backgroundMusic');
     let isPaused = true;
@@ -466,13 +504,13 @@
         backgroundMusic.pause();
         playPauseButton.textContent = '▶';
       } else {
-        backgroundMusic.play().catch(error => console.error('Error al reproducir la música:', error));
+        backgroundMusic.play().catch(() => {});
         playPauseButton.textContent = '⏸';
       }
     });
     backgroundMusic.pause();
 
-    // Personalización con ?json= (parche mínimo)
+    // Personalización con ?json= (parche completo y funcional)
     function getJsonParam() {
       try {
         const url = new URL(window.location.href);
@@ -496,7 +534,7 @@
         if (h1) h1.textContent = String(json.main_title);
       }
 
-      // Imagen del rompecabezas (y preview)
+      // Imagen del rompecabezas y previsualización
       if (json.puzzle_image) {
         imageObj.src = String(json.puzzle_image);
         document.getElementById('previewImage').src = String(json.puzzle_image);
@@ -506,7 +544,7 @@
       if (json.grid_size) {
         const newSize = parseInt(json.grid_size, 10);
         if (newSize >= 2 && newSize <= 8) {
-          window.GRID_SIZE = newSize; // Se sobreescribe la constante
+          window.GRID_SIZE = newSize;
         }
       }
 
@@ -514,6 +552,10 @@
       if (json.completion_title) {
         const h2 = document.querySelector('#completionModal h2');
         if (h2) h2.textContent = String(json.completion_title);
+      }
+      if (json.completion_message) {
+        const p = document.querySelector('#completionModal p');
+        if (p) p.innerHTML = String(json.completion_message).replace(/\\n/g, '<br>');
       }
       if (json.completion_button) {
         const btn = document.getElementById('closeCompletionModal');
@@ -530,9 +572,6 @@
         }
       }
     }
-
-    // El resto del código (createPuzzle, etc.) se mantiene igual...
-    // (Aquí iría el resto del script original que no fue modificado)
   </script>
 </body>
-</html>
+</html>
