@@ -1,17 +1,16 @@
-
 <!DOCTYPE html>
-<!-- Variable: page_title       | text | Valor por defecto: Rompecabezas del Amor -->
-<!-- Variable: main_title       | text | Valor por defecto: Rompecabezas del Amor -->
-<!-- Variable: puzzle_image     | url  | Valor por defecto: https://cdn.pensador.com/es/imagenes/sin-ti-mi-vida-tendri-a-menos-luz-te-amo-mi-amor.jpg -->
-<!-- Variable: grid_size        | text | Valor por defecto: 2 -->
-<!-- Variable: completion_title | text | Valor por defecto: Este es el texto del final cuando termina el puzzle -->
-<!-- Variable: completion_button| text | Valor por defecto: Cerrar -->
-<!-- Variable: music_file       | url  | Valor por defecto: Chino&Nacho - Niña Bonita.mp3 -->
+<!-- Variable: main_title       | text | Valor por defecto: Rompecabezas del Amor | Descripción: El título principal que se ve en letras grandes arriba del juego | Título: Título de la Carta -->
+<!-- Variable: puzzle_image     | url-image | Valor por defecto: https://cdn.pensador.com/es/imagenes/sin-ti-mi-vida-tendri-a-menos-luz-te-amo-mi-amor.jpg | Descripción: Sube o pega el link de la foto que quieres armar | Título: Imagen del Rompecabezas -->
+<!-- Variable: grid_size        | text | Valor por defecto: 3 | Descripción: Cantidad de piezas por lado (Ej: 3 creará un puzzle de 3x3). Usa valores entre 2 y 5 | Título: Nivel de Dificultad -->
+<!-- Variable: completion_title | text | Valor por defecto: ¡Felicidades! Lograste armar nuestro amor. | Descripción: Mensaje especial que aparece cuando se colocan todas las piezas | Título: Mensaje de Victoria -->
+<!-- Variable: completion_button| text | Valor por defecto: ¡Te Amo! | Descripción: El texto que dirá el botón para cerrar el mensaje final | Título: Botón de Cierre -->
+<!-- Variable: url-yt           | url-yt | Valor por defecto: https://youtu.be/f_AV_hRr2l0?si=yW4_n_UaRJ_CmWWj | Descripción: Busca y selecciona la canción de YouTube que acompañará el juego | Título: Música Romántica -->
+
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Rompecabezas del Amor</title>
+  <title>Rompecabezas</title>
   <script src="https://unpkg.com/konva@9.3.6/konva.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css">
@@ -27,7 +26,13 @@
         <button id="resetButton" class="shadow-xl">Reinciar</button>
     
   </div>
-    <audio id="backgroundMusic" src="Chino&amp;Nacho%20-%20Niña%20Bonita.mp3" preload="auto" loop></audio>
+    <div id="youtube-container" style="position: fixed; top: 0; left: 0; width: 1px; height: 1px; z-index: -1; overflow: hidden; opacity: 0;"></div>
+
+    <div id="unlockOverlay" class="fixed inset-0 bg-black/90 z-[10000] flex flex-col justify-center items-center text-white cursor-pointer transition-opacity duration-500">
+      <p class="mb-5 text-xl font-bold">¡Rompecabezas del Amor!</p>
+      <button id="unlockButton" class="bg-pink-600 hover:bg-pink-700 text-white px-8 py-4 rounded-lg text-2xl font-bold transition-transform hover:scale-105 shadow-lg">Haz click aquí para empezar</button>
+    </div>
+
     <div id="previewModal">
     <img id="previewImage" src="https://cdn.pensador.com/es/imagenes/sin-ti-mi-vida-tendri-a-menos-luz-te-amo-mi-amor.jpg " alt="Puzzle Preview">  
     <button id="closeModal">Cerrar</button>
@@ -43,6 +48,7 @@
     </div>
     <audio id="correctSound" src="bien.mp3" preload="auto"></audio>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     // Romantic particle background with glowing hearts and sparkles
     const canvas = document.getElementById('backgroundCanvas');
@@ -149,6 +155,31 @@
         return null;
       }
     }
+
+    // ==================== YOUTUBE API ====================
+    let player;
+    let youtubePlayerReady = false;
+
+    function extractYoutubeId(url) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : url;
+    }
+
+    window.onYouTubeIframeAPIReady = function() {
+      const jsonParams = getJsonParam() || {};
+      const videoId = extractYoutubeId(jsonParams['url-yt'] || "f_AV_hRr2l0");
+      player = new YT.Player('youtube-container', {
+        height: '0', width: '0', videoId: videoId,
+        playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': videoId, 'controls': 0 },
+        events: {
+          'onReady': (e) => {
+            e.target.setVolume(50);
+            youtubePlayerReady = true;
+          }
+        }
+      });
+    };
 
     let GRID_SIZE = 3; //En esta linea se define el numero de piezaz viendo como por ejemplo 5 = 5 x 5 = 25 piezas
     const jsonParams = getJsonParam();
@@ -518,22 +549,32 @@
       layer.draw();
     }
         const playPauseButton = document.getElementById('playPauseButton');
-const backgroundMusic = document.getElementById('backgroundMusic');
-let isPaused = true; // Start in paused state
 
 playPauseButton.addEventListener('click', () => {
-  isPaused = !isPaused;
-  if (isPaused) {
-    backgroundMusic.pause();
+  if (!player || !youtubePlayerReady) return;
+  
+  const state = player.getPlayerState();
+  if (state === 1) { // Playing
+    player.pauseVideo();
     playPauseButton.textContent = '▶';
   } else {
-    backgroundMusic.play().catch(error => console.error('Error al reproducir la música:', error));
+    player.playVideo();
     playPauseButton.textContent = '⏸';
   }
 });
 
-// Ensure music is paused initially
-backgroundMusic.pause();
+    // Logic for the unlock overlay
+    const unlockOverlay = document.getElementById('unlockOverlay');
+    const unlockButton = document.getElementById('unlockButton');
+
+    unlockButton.addEventListener('click', () => {
+      if (youtubePlayerReady) {
+        player.playVideo();
+        unlockOverlay.classList.add('opacity-0');
+        setTimeout(() => unlockOverlay.style.display = 'none', 500);
+        playPauseButton.textContent = '⏸';
+      }
+    });
  
     // Lógica para cerrar el modal
     const closeButton = document.getElementById('closeCompletionModal');
@@ -568,23 +609,7 @@ backgroundMusic.pause();
         const btn = document.getElementById('closeCompletionModal');
         if (btn) btn.textContent = String(jsonParams.completion_button);
       }
-
-      // Música de fondo
-      if (jsonParams.music_file) {
-        const audio = document.getElementById('backgroundMusic');
-        const source = audio.querySelector('source');
-        if (source) {
-          source.src = String(jsonParams.music_file);
-          audio.load();
-        }
-      }
     }
   </script>
 </body>
 </html>
-
-
-
-
-
-
