@@ -355,9 +355,10 @@
         correctY: row * PIECE_SIZE,
         row, col,
         dragBoundFunc: function(pos) {
-  const containerEl = stage.container();
-  const maxX = containerEl.offsetWidth  - PIECE_SIZE;
-  const maxY = containerEl.offsetHeight - PIECE_SIZE;
+          const stageWidth = this.getStage().width();
+          const stageHeight = this.getStage().height();
+          const maxX = stageWidth - PIECE_SIZE;
+          const maxY = stageHeight - PIECE_SIZE;
   return {
     x: Math.max(0, Math.min(pos.x, maxX)),
     y: Math.max(0, Math.min(pos.y, maxY))
