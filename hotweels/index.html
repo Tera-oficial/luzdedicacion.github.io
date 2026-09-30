@@ -458,6 +458,8 @@
             };
         }
 
+        const urlParams = getUrlParams();
+
         function getStorageData() {
             try {
                 const stored = localStorage.getItem('hotWheelsData');
@@ -469,7 +471,6 @@
         }
 
         function loadCustomization() {
-            const urlParams = getUrlParams();
             const storageData = getStorageData();
             let configData = {};
 
@@ -557,15 +558,31 @@
         // ==================== YOUTUBE API ====================
         let player;
         let youtubePlayerReady = false;
+        const defaultYoutubeVideoId = 'IVEWT2WI61E';
 
         function extractYoutubeId(url) {
+            if (!url) return defaultYoutubeVideoId;
+            if (/^[\w-]{11}$/.test(url)) return url;
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : url;
+            return (match && match[2].length === 11) ? match[2] : defaultYoutubeVideoId;
+        }
+
+        function getYoutubeVideoId() {
+            if (urlParams.json) {
+                try {
+                    const config = JSON.parse(decodeURIComponent(urlParams.json));
+                    if (config['url-yt']) return extractYoutubeId(config['url-yt']);
+                } catch (e) {
+                    console.warn('Parámetro JSON de YouTube inválido; se usará el video predeterminado.', e);
+                }
+            }
+            return defaultYoutubeVideoId;
         }
 
         window.onYouTubeIframeAPIReady = function() {
-            const videoId = extractYoutubeId(urlParams.json ? JSON.parse(decodeURIComponent(urlParams.json))['url-yt'] || "IVEWT2WI61E" : "IVEWT2WI61E");
+            const videoId = getYoutubeVideoId();
+            console.log('YouTube videoId:', videoId);
             player = new YT.Player('youtube-container', {
                 height: '0', width: '0', videoId: videoId,
                 playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': videoId, 'controls': 0 },
@@ -573,6 +590,10 @@
                     'onReady': (e) => {
                         e.target.setVolume(50);
                         youtubePlayerReady = true;
+                        console.log('YouTube player listo');
+                    },
+                    'onError': (e) => {
+                        console.error('Error de YouTube Player:', e.data);
                     }
                 }
             });
