@@ -30,6 +30,7 @@
     <div id="unlockOverlay" class="fixed inset-0 bg-black/90 z-[10000] flex flex-col justify-center items-center text-white cursor-pointer transition-opacity duration-500">
       <p class="mb-5 text-xl font-bold">¡Rompecabezas del Amor!</p>
       <p id="musicStatus" class="mb-5 text-center" role="status">Conectando con YouTube...</p>
+      <a id="openYoutubeLink" class="hidden mb-5 text-pink-200 underline" target="_blank" rel="noopener noreferrer">Abrir canción en YouTube</a>
       <button id="unlockButton" class="bg-pink-600 hover:bg-pink-700 text-white px-8 py-4 rounded-lg text-2xl font-bold transition-transform hover:scale-105 shadow-lg" disabled>Conectando con YouTube...</button>
     </div>
 
@@ -164,6 +165,9 @@
     const unlockOverlay = document.getElementById('unlockOverlay');
     const unlockButton = document.getElementById('unlockButton');
     const musicStatus = document.getElementById('musicStatus');
+    const openYoutubeLink = document.getElementById('openYoutubeLink');
+    const musicParams = getJsonParam() || {};
+    const youtubeUrl = musicParams['url-yt'] || 'https://youtu.be/2Af15Gcqxcg';
 
     function dismissUnlockOverlay() {
       unlockOverlay.classList.add('opacity-0');
@@ -177,8 +181,8 @@
     }
 
     window.onYouTubeIframeAPIReady = function() {
-      const musicParams = getJsonParam() || {};
-      const videoId = extractYoutubeId(musicParams['url-yt'] || 'https://youtu.be/2Af15Gcqxcg');
+      const videoId = extractYoutubeId(youtubeUrl);
+      openYoutubeLink.href = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
       const playerVars = {
         autoplay: 0,
         loop: 1,
@@ -215,7 +219,12 @@
           },
           'onError': (event) => {
             youtubePlaybackFailed = true;
-            musicStatus.textContent = 'YouTube no pudo reproducir esta canción. Revisa el enlace o continúa sin música.';
+            musicStatus.textContent = event.data === 101 || event.data === 150
+              ? 'El propietario bloqueó la reproducción de esta canción dentro del juego.'
+              : event.data === 153
+                ? 'YouTube no recibió la referencia segura de esta página. Ábrela desde su dirección HTTPS publicada.'
+                : `YouTube no pudo reproducir esta canción (error ${event.data}).`;
+            openYoutubeLink.classList.remove('hidden');
             unlockButton.textContent = 'Continuar sin música';
             unlockButton.disabled = false;
             playPauseButton.textContent = '▶';
@@ -230,6 +239,8 @@
 
       youtubePlaybackFailed = true;
       musicStatus.textContent = 'No se pudo conectar con YouTube. Puedes continuar sin música.';
+      openYoutubeLink.href = `https://www.youtube.com/watch?v=${encodeURIComponent(extractYoutubeId(youtubeUrl))}`;
+      openYoutubeLink.classList.remove('hidden');
       unlockButton.textContent = 'Continuar sin música';
       unlockButton.disabled = false;
     }, 15000);
