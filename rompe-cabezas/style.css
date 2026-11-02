@@ -2,7 +2,8 @@ body {
       overscroll-behavior: none;
       font-family: 'Playfair Display', serif;
       margin: 20;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       position: relative;
       min-height: 100vh;
       background: linear-gradient(135deg, #fce7f3 0%, #e9d5ff 100%);
@@ -249,6 +250,11 @@ body {
   color: #999999;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+#unlockButton:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 @media (max-width: 640px) {
