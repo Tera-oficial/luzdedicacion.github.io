@@ -1,22 +1,14 @@
 <!DOCTYPE html>
 <!-- Variable: url-yt | url-yt | Valor por defecto: https://youtu.be/IVEWT2WI61E | Descripción: Busca y selecciona la canción que sonará de fondo | Título: Música Romántica -->
 <!-- Variable: title | text | Valor por defecto: Feliz 14 de febrero 🚗✨🚙 | Descripción: El título que aparece al principio de la carta | Título: Título de la Carta -->
-<!-- Variable: card_1_text | text | Valor por defecto: Eres lo más adorable que existe en el mundo | Descripción: Mensaje cariñoso de la primera sorpresa | Título: Sorpresa 1 - Mensaje -->
-<!-- Variable: card_1_image | url-image | Valor por defecto: 15452416972381341195 | Descripción: Sube una foto o GIF para la primera sorpresa | Título: Sorpresa 1 - Foto -->
-<!-- Variable: card_2_text | text | Valor por defecto: Esos ojitos me enamoran cada día más | Descripción: Mensaje cariñoso de la segunda sorpresa | Título: Sorpresa 2 - Mensaje -->
-<!-- Variable: card_2_image | url-image | Valor por defecto: 929037692860537381 | Descripción: Sube una foto o GIF para la segunda sorpresa | Título: Sorpresa 2 - Foto -->
-<!-- Variable: card_3_text | text | Valor por defecto: Me haces feliz solo con tu presencia | Descripción: Mensaje cariñoso de la tercera sorpresa | Título: Sorpresa 3 - Mensaje -->
-<!-- Variable: card_3_image | url-image | Valor por defecto: 17087730549298592880 | Descripción: Sube una foto o GIF para la tercera sorpresa | Título: Sorpresa 3 - Foto -->
-<!-- Variable: card_4_text | text | Valor por defecto: Cada momento contigo es especial para mi corazón | Descripción: Mensaje cariñoso de la cuarta sorpresa | Título: Sorpresa 4 - Mensaje -->
-<!-- Variable: card_4_image | url-image | Valor por defecto: 17266900336609124174 | Descripción: Sube una foto o GIF para la cuarta sorpresa | Título: Sorpresa 4 - Foto -->
-<!-- Variable: card_5_text | text | Valor por defecto: Cuando no estás, mi día no es el mismo sin ti | Descripción: Mensaje cariñoso de la quinta sorpresa | Título: Sorpresa 5 - Mensaje -->
-<!-- Variable: card_5_image | url-image | Valor por defecto: 5156837190595508362 | Descripción: Sube una foto o GIF para la quinta sorpresa | Título: Sorpresa 5 - Foto -->
-<!-- Variable: card_6_text | text | Valor por defecto: Gracias por traer alegría a mi vida | Descripción: Mensaje cariñoso de la sexta sorpresa | Título: Sorpresa 6 - Mensaje -->
-<!-- Variable: card_6_image | url-image | Valor por defecto: 1169391631415947888 | Descripción: Sube una foto o GIF para la sexta sorpresa | Título: Sorpresa 6 - Foto -->
-<!-- Variable: card_7_text | text | Valor por defecto: Eres mi compañero, mi amigo, mi amor | Descripción: Mensaje cariñoso de la séptima sorpresa | Título: Sorpresa 7 - Mensaje -->
-<!-- Variable: card_7_image | url-image | Valor por defecto: 2947547264280237650 | Descripción: Sube una foto o GIF para la séptima sorpresa | Título: Sorpresa 7 - Foto -->
-<!-- Variable: card_8_text | text | Valor por defecto: Te amo infinitamente mi amor peludito | Descripción: Mensaje cariñoso de la octava sorpresa | Título: Sorpresa 8 - Mensaje -->
-<!-- Variable: card_8_image | url-image | Valor por defecto: 16533732953575511232 | Descripción: Sube una foto o GIF para la octava sorpresa | Título: Sorpresa 8 - Foto -->
+<!-- Variable: card_1 | target | Valor por defecto: ["Eres lo más adorable que existe en el mundo","15452416972381341195"] | Descripción: Personaliza el mensaje y la imagen de la primera sorpresa | Título: Sorpresa 1 -->
+<!-- Variable: card_2 | target | Valor por defecto: ["Esos ojitos me enamoran cada día más","929037692860537381"] | Descripción: Personaliza el mensaje y la imagen de la segunda sorpresa | Título: Sorpresa 2 -->
+<!-- Variable: card_3 | target | Valor por defecto: ["Me haces feliz solo con tu presencia","17087730549298592880"] | Descripción: Personaliza el mensaje y la imagen de la tercera sorpresa | Título: Sorpresa 3 -->
+<!-- Variable: card_4 | target | Valor por defecto: ["Cada momento contigo es especial para mi corazón","17266900336609124174"] | Descripción: Personaliza el mensaje y la imagen de la cuarta sorpresa | Título: Sorpresa 4 -->
+<!-- Variable: card_5 | target | Valor por defecto: ["Cuando no estás, mi día no es el mismo sin ti","5156837190595508362"] | Descripción: Personaliza el mensaje y la imagen de la quinta sorpresa | Título: Sorpresa 5 -->
+<!-- Variable: card_6 | target | Valor por defecto: ["Gracias por traer alegría a mi vida","1169391631415947888"] | Descripción: Personaliza el mensaje y la imagen de la sexta sorpresa | Título: Sorpresa 6 -->
+<!-- Variable: card_7 | target | Valor por defecto: ["Eres mi compañero, mi amigo, mi amor","2947547264280237650"] | Descripción: Personaliza el mensaje y la imagen de la séptima sorpresa | Título: Sorpresa 7 -->
+<!-- Variable: card_8 | target | Valor por defecto: ["Te amo infinitamente mi amor peludito","16533732953575511232"] | Descripción: Personaliza el mensaje y la imagen de la octava sorpresa | Título: Sorpresa 8 -->
 <html lang="es">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -537,8 +529,13 @@
                     const textKey = `card_${i}_text`;
                     const imageKey = `card_${i}_image`;
                     const defaultCard = defaultCardContents[i-1];
-                    const text = configData[textKey] || defaultCard?.text || `Contenido de la tarjeta ${i}`;
-                    const image = configData[imageKey] || defaultCard?.image || "";
+                    const target = configData[`card_${i}`];
+                    const text = Array.isArray(target)
+                        ? String(target[0] ?? '')
+                        : configData[textKey] || defaultCard?.text || `Contenido de la tarjeta ${i}`;
+                    const image = Array.isArray(target)
+                        ? String(target[1] ?? '')
+                        : configData[imageKey] || defaultCard?.image || "";
                     cards.push({ 
                         text: text, 
                         image: image
@@ -623,6 +620,7 @@
             const loveCard = document.getElementById('love-card');
             const cardPhoto = document.getElementById('card-photo');
             const cardText = document.getElementById('card-text');
+            cardPhoto.onerror = () => { cardPhoto.style.display = 'none'; };
             const closeBtn = document.querySelector('.close-btn');
             const titleContainer = document.querySelector('.title-container');
             const container = document.querySelector('body.container');
@@ -776,13 +774,13 @@
     console.log('📦 cardContents:', cardContents);
     cardContents.forEach((content, index) => {
         console.log(`📸 Tarjeta ${index + 1} - Image URL:`, content.image);
-        if (content.image) {
+        if (content.image && !/^\d+$/.test(String(content.image))) {
             const img = new Image();
             img.onload = () => console.log(`✅ Imagen ${index + 1} cargada correctamente`);
-            img.onerror = () => console.warn(`❌ Imagen ${index + 1} NO cargó: ${content.image}`);
+            img.onerror = () => {};
             img.src = content.image;
         } else {
-            console.log(`⏭️ Tarjeta ${index + 1} sin imagen`);
+            console.log(`⏭️ Tarjeta ${index + 1} sin URL de imagen precargable`);
         }
     });
 }
