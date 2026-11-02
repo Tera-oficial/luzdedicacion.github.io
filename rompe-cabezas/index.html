@@ -225,6 +225,10 @@
     }
 
     function initStage(boardSize, extraWidth, extraHeight) {
+      if (stage) {
+        stage.destroy();
+      }
+
       stage = new Konva.Stage({
         container: 'container',
         width: boardSize + extraWidth,
@@ -387,12 +391,12 @@
 
       group.add(shape);
 
-      group.on('dragstart touchstart', () => {
+      group.on('dragstart', () => {
         group.moveToTop();
         layer.draw();
       });
 
-      group.on('dragend touchend', () => {
+      group.on('dragend', () => {
         const { correctX, correctY } = group.attrs;
         if (Math.abs(group.x() - correctX) < PIECE_SIZE / 4 &&
             Math.abs(group.y() - correctY) < PIECE_SIZE / 4) {
@@ -567,13 +571,13 @@ playPauseButton.addEventListener('click', () => {
     const unlockOverlay = document.getElementById('unlockOverlay');
     const unlockButton = document.getElementById('unlockButton');
 
-    unlockButton.addEventListener('click', () => {
+    unlockOverlay.addEventListener('click', () => {
       if (youtubePlayerReady) {
         player.playVideo();
-        unlockOverlay.classList.add('opacity-0');
-        setTimeout(() => unlockOverlay.style.display = 'none', 500);
         playPauseButton.textContent = '⏸';
       }
+      unlockOverlay.classList.add('opacity-0');
+      setTimeout(() => unlockOverlay.style.display = 'none', 500);
     });
  
     // Lógica para cerrar el modal
