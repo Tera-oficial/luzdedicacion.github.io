@@ -3,7 +3,7 @@
 <!-- Variable: puzzle_image     | url-image | Valor por defecto: https://cdn.pensador.com/es/imagenes/sin-ti-mi-vida-tendri-a-menos-luz-te-amo-mi-amor.jpg | Descripción: Sube o pega el link de la foto que quieres armar | Título: Imagen del Rompecabezas -->
 <!-- Variable: grid_size        | text | Valor por defecto: 3 | Descripción: Cantidad de piezas por lado (Ej: 3 creará un puzzle de 3x3). Usa valores entre 2 y 5 | Título: Nivel de Dificultad -->
 <!-- Variable: completion_title | text | Valor por defecto: ¡Felicidades! Lograste armar nuestro amor. | Descripción: Mensaje especial que aparece cuando se colocan todas las piezas | Título: Mensaje de Victoria -->
-<!-- Variable: url-yt           | url-yt | Valor por defecto: https://youtu.be/2Af15Gcqxcg | Descripción: Busca y selecciona la canción de YouTube que acompañará el juego | Título: Música Romántica -->
+<!-- Variable: url-yt           | url-yt | Valor por defecto: https://youtu.be/HJstyRBLqBQ | Descripción: Busca y selecciona la canción de YouTube que acompañará el juego | Título: Música Romántica -->
 
 <html lang="es">
 <head>
@@ -167,7 +167,7 @@
     const musicStatus = document.getElementById('musicStatus');
     const openYoutubeLink = document.getElementById('openYoutubeLink');
     const musicParams = getJsonParam() || {};
-    const youtubeUrl = musicParams['url-yt'] || 'https://youtu.be/2Af15Gcqxcg';
+    const youtubeUrl = musicParams['url-yt'] || 'https://youtu.be/HJstyRBLqBQ';
 
     function dismissUnlockOverlay() {
       unlockOverlay.classList.add('opacity-0');
